@@ -23,7 +23,6 @@ class TwitterStreamListener(tweepy.StreamListener):
             Subject='twitter_text')
         print(response['ResponseMetadata']['HTTPStatusCode'])
 
-
     def initialize_twitter_api(self):
         auth = tweepy.OAuthHandler(os.getenv('CONSUMER_KEY'), os.getenv('CONSUMER_SECRET'))
         auth.set_access_token(os.getenv('ACCESS_TOKEN'), os.getenv('ACCESS_SECRET'))
@@ -38,20 +37,4 @@ class TwitterStreamListener(tweepy.StreamListener):
             aws_session_token=os.getenv('AWS_SESSION_TOKEN'),
             region_name=os.getenv('REGION_NAME')
         )
-
-    # def test_sns_publishing(self):
-    #     topicArn = 'arn:aws:sns:us-east-1:528869935487:twitterTopic'
-    #     snsClient = boto3.client(
-    #         'sns',
-    #         aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID'),
-    #         aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    #         aws_session_token=os.getenv('AWS_SESSION_TOKEN'),
-    #         region_name=os.getenv('REGION_NAME')
-    #     )
-    #     publish_object = {'text': 'test_text_sent_from_pycharm_2'}
-    #     response = snsClient.publish(
-    #         TopicArn=topicArn,
-    #         Message=json.dumps(publish_object),
-    #         Subject='Test_message_pycharm')
-    #     print(response['ResponseMetadata']['HTTPStatusCode'])
 
