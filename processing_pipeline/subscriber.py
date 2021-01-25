@@ -1,31 +1,28 @@
-import boto3
 import os
 from dotenv import load_dotenv
 import time
 import json
+from google.cloud import pubsub_v1
+
+
+def callback(message):
+    print(json.loads(message.data))
+    message.ack()
 
 
 def receive_message():
     load_dotenv()
-    sqs_client = boto3.client(
-        'sqs',
-        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-        aws_session_token=os.getenv('AWS_SESSION_TOKEN'),
-        region_name=os.getenv('REGION_NAME')
-    )
-    response = sqs_client.receive_message(
-        QueueUrl=os.getenv('QUEUE_URL'),
-        AttributeNames=['All'],
-        MessageAttributeNames=[
-            'All',
-        ],
-        MaxNumberOfMessages=5,
-        VisibilityTimeout=10,
-        WaitTimeSeconds=10
-    )
-    tweets = []
-    for message in response['Messages']:
-        text = json.loads(json.loads(message['Body'])['Message'])['text']
-        tweets.append(text)
-    return tweets
+    subscriber = pubsub_v1.SubscriberClient()
+    subscription_path = subscriber.subscription_path(os.getenv('GC_PROJECT'), os.getenv('PUBSUB_SUBSCRIPTION'))
+    streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
+    print(f"Listening for messages on {subscription_path}..\n")
+    timeout = 5.0
+    with subscriber:
+        try:
+            streaming_pull_future.result(timeout=timeout)
+        except TimeoutError:
+            streaming_pull_future.cancel()
+
+
+if __name__ == '__main__':
+    receive_message()
