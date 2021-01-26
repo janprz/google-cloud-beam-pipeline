@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from google.cloud import pubsub_v1
 import datetime
 import time
+import logging
 
 
 class TwitterStreamListener(tweepy.StreamListener):
@@ -18,8 +19,8 @@ class TwitterStreamListener(tweepy.StreamListener):
         self.initialize_pubsub_client()
 
     def on_status(self, data):
-        print(data)
         self.send_to_pubsub(data._json)
+        logging.info("Message published, id: {}, timestamp: {} ".format(data._json['id'], data._json['created_at']))
 
     def send_to_pubsub(self, data):
         if data['lang'] == 'en':
